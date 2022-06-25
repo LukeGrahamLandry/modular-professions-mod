@@ -2,9 +2,14 @@ package ca.lukegrahamlandry.modularprofessions.api;
 
 import ca.lukegrahamlandry.modularprofessions.capability.ProfessionsXp;
 import ca.lukegrahamlandry.modularprofessions.capability.ProfessionsXpCapProvider;
+import ca.lukegrahamlandry.modularprofessions.init.NetworkInit;
+import ca.lukegrahamlandry.modularprofessions.network.clientbound.AddProfXpPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.*;
 
@@ -46,6 +51,26 @@ public class ModularProfessionsApiImpl implements ModularProfessionsApi {
 
     @Override
     public void addXp(Player player, ResourceLocation profession, float amount) {
-        player.getCapability(ProfessionsXpCapProvider.CAP).ifPresent((xp) -> xp.addXp(profession, amount));
+        player.getCapability(ProfessionsXpCapProvider.CAP).ifPresent((xp) -> {
+            xp.addXp(profession, amount);
+        });
+        if (!player.level.isClientSide()){
+            NetworkInit.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new AddProfXpPacket(amount, profession));
+        }
+    }
+
+    @Override
+    public boolean canUseItem(Player player, ItemStack stack, ProfessionData.LockType type) {
+        LazyOptional<ProfessionsXp> xpHolder = player.getCapability(ProfessionsXpCapProvider.CAP);
+        if (!xpHolder.isPresent()) return false;
+        ProfessionsXp xp = xpHolder.resolve().get();
+
+        boolean isEverLocked = false;
+        for (ResourceLocation key : getProfessions()){
+            ProfessionData profession = getData(key);
+            if (profession.unlockedAtLevel(stack, xp.getLevel(key), type)) return true;
+            if (profession.isRestricted(stack, type)) isEverLocked = true;
+        }
+        return !isEverLocked;
     }
 }

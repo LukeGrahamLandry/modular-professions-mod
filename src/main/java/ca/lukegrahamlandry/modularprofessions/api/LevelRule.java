@@ -19,8 +19,8 @@ public interface LevelRule {
     class Polynomial implements LevelRule {
         private final float exponent;
 
-        public Polynomial(float base){
-            this.exponent = 1 / base;
+        public Polynomial(float rootBase){
+            this.exponent = 1 / rootBase;
         }
 
         @Override
