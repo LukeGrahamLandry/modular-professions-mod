@@ -14,7 +14,7 @@ import java.util.List;
 public class ItemCollection {
     List<String> mods = new ArrayList<>();
     List<ResourceLocation> objects = new ArrayList<>();
-    List<TagKey> tags = new ArrayList<>();
+    List<TagKey<Item>> tags = new ArrayList<>();
 
     //TODO: tags wont work for USE_BLOCK because they check item tags on the blockitem
 
@@ -22,7 +22,7 @@ public class ItemCollection {
         ResourceLocation key = item.getItem().getRegistryName();
         if (mods.contains(key.getNamespace())) return true;
         if (objects.contains(key)) return true;
-        for (TagKey tag : tags){
+        for (TagKey<Item> tag : tags){
             if (item.is(tag)) return true;
         }
         return false;
@@ -32,7 +32,11 @@ public class ItemCollection {
         this.objects.add(item.getRegistryName());
     }
 
-    public void add(TagKey tag) {
+    public void add(TagKey<Item> tag) {
         this.tags.add(tag);
+    }
+
+    public void add(String modid) {
+        this.mods.add(modid);
     }
 }

@@ -1,0 +1,27 @@
+{
+  "leveling": {
+    "type": "power",
+    "scale": 2
+  },
+  "triggers": [
+
+  ],
+  "unlocked": [
+    {
+      "use_item": [
+        "minecraft:bow"
+      ]
+    },
+    {
+      "item_use": [
+        "minecraft:iron_pickaxe"
+      ],
+      "block_use": [
+        "minecraft:crafting_table"
+      ],
+      "craft": [
+        "minecraft:stick"
+      ]
+    }
+  ]
+}

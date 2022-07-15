@@ -2,6 +2,7 @@ package ca.lukegrahamlandry.modularprofessions.api;
 
 import ca.lukegrahamlandry.modularprofessions.capability.ProfessionsXp;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.units.qual.A;
@@ -44,19 +45,33 @@ public class ProfessionData implements LevelRule {
         return unlockedAtLevel(stack, lockedItems.size()-1, type);
     }
 
-    // TODO: these must be synced to the client after loading so that the events will be handled the same way on both sides
-    // which means i have to also sync the levels to the client
-    public void addLockedItem(Item item, int unlockLevel, LockType type) {
-        while (lockedItems.size() <= unlockLevel){
+    private void createLevels(int level){
+        while (lockedItems.size() <= level){
             HashMap<LockType, ItemCollection> map = new HashMap<>();
             map.put(LockType.CRAFT, new ItemCollection());
             map.put(LockType.ITEM_USE, new ItemCollection());
             map.put(LockType.BLOCK_USE, new ItemCollection());
             lockedItems.add(map);
         }
+    }
 
+
+    public void addLockedItem(Item item, int unlockLevel, LockType type) {
+        createLevels(unlockLevel);
         ItemCollection collection = lockedItems.get(unlockLevel).get(type);
         collection.add(item);
+    }
+
+    public void addLockedTag(TagKey<Item> tag, int unlockLevel, LockType type) {
+        createLevels(unlockLevel);
+        ItemCollection collection = lockedItems.get(unlockLevel).get(type);
+        collection.add(tag);
+    }
+
+    public void addLockedMod(String modid, int unlockLevel, LockType type) {
+        createLevels(unlockLevel);
+        ItemCollection collection = lockedItems.get(unlockLevel).get(type);
+        collection.add(modid);
     }
 
     public enum LockType {

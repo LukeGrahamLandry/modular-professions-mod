@@ -1,6 +1,19 @@
 package ca.lukegrahamlandry.modularprofessions.api;
 
+import com.google.gson.JsonObject;
+
 public interface LevelRule {
+    static LevelRule parse(JsonObject leveling) {
+        String type = leveling.get("type").getAsString();
+        if (type.equals("linear")){
+            return new Linear(leveling.get("scale").getAsFloat());
+        }
+        if (type.equals("power")){
+            return new Linear(leveling.get("scale").getAsFloat());
+        }
+        return null;
+    }
+
     int getLevel(float xp);
 
     class Linear implements LevelRule {
@@ -16,10 +29,10 @@ public interface LevelRule {
         }
     }
 
-    class Polynomial implements LevelRule {
+    class Power implements LevelRule {
         private final float exponent;
 
-        public Polynomial(float rootBase){
+        public Power(float rootBase){
             this.exponent = 1 / rootBase;
         }
 
