@@ -18,6 +18,6 @@ public class ModMain {
     public static final ModularProfessionsApi API = new ModularProfessionsApiImpl();
 
     public ModMain() {
-        // no professions registered directly with the api class
+
     }
 }

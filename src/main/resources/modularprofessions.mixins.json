@@ -4,7 +4,9 @@
   "compatibilityLevel": "JAVA_16",
   "refmap": "modularprofessions.refmap.json",
   "mixins": [
-    "CraftSlotMixin"
+    "CraftingContainerMixin",
+    "ReloadCommandMixin",
+    "ResultSlotMixin"
   ],
   "client": [
   ],

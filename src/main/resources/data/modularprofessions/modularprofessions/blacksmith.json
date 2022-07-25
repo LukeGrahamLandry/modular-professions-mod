@@ -4,7 +4,16 @@
     "scale": 2
   },
   "triggers": [
-
+    {
+      "type": "modularprofessions:crafting",
+      "amount": 1,
+      "input": [
+        "minecraft:iron_ingot"
+      ],
+      "output": [
+        "minecraft:stone_pickaxe"
+      ]
+    }
   ],
   "unlocked": [
     {

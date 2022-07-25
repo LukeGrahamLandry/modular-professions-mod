@@ -2,6 +2,8 @@ package ca.lukegrahamlandry.modularprofessions.api;
 
 import ca.lukegrahamlandry.modularprofessions.ModMain;
 import ca.lukegrahamlandry.modularprofessions.init.NetworkInit;
+import ca.lukegrahamlandry.modularprofessions.network.clientbound.AddProfXpPacket;
+import ca.lukegrahamlandry.modularprofessions.network.clientbound.ClearProfessionsPacket;
 import ca.lukegrahamlandry.modularprofessions.network.clientbound.SyncProfessionJson;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -38,9 +40,8 @@ public class ProfessionDataLoader extends SimpleJsonResourceReloadListener {
             JsonElement data = files.get(name);
 
             ModMain.API.parse(name, data.getAsJsonObject());
-
-            toSync.addAll(files.entrySet());
         }
+        toSync.addAll(files.entrySet());
     }
 
 
@@ -48,6 +49,7 @@ public class ProfessionDataLoader extends SimpleJsonResourceReloadListener {
     public static void initCaps(AddReloadListenerEvent event){
         System.out.println("reload listener");
 
+        toSync.clear();
         event.addListener(new ProfessionDataLoader());
     }
 
@@ -57,8 +59,14 @@ public class ProfessionDataLoader extends SimpleJsonResourceReloadListener {
 
         if (!player.level.isClientSide()){
             ModMain.LOGGER.debug("syncing " + toSync.size() + " files to client " + player.getScoreboardName());
+            NetworkInit.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new ClearProfessionsPacket());
+
             for (Map.Entry<ResourceLocation, JsonElement> file : toSync){
                 NetworkInit.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new SyncProfessionJson(file.getKey(), file.getValue()));
+            }
+
+            for (ResourceLocation profession : ModMain.API.getProfessions()) {
+                NetworkInit.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new AddProfXpPacket(ModMain.API.getXp(player, profession), profession));
             }
         }
     }

@@ -1,7 +1,6 @@
 package ca.lukegrahamlandry.modularprofessions.api;
 
 import ca.lukegrahamlandry.modularprofessions.ModMain;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -26,4 +25,12 @@ public interface ModularProfessionsApi {
     boolean canUseItem(Player player, ItemStack stack, ProfessionData.LockType type);
 
     void parse(ResourceLocation name, JsonObject data);
+
+    void clearAll();
+
+    void resyncToClient();
+
+    void awardXp(Player player, ResourceLocation profession, XpTrigger trigger);
+
+    void handleCraftingTriggers(Player player, ItemStack output, List<ItemStack> input);
 }

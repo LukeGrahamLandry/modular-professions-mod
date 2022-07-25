@@ -5,6 +5,8 @@ import ca.lukegrahamlandry.modularprofessions.capability.ProfessionsXp;
 import ca.lukegrahamlandry.modularprofessions.capability.ProfessionsXpCapProvider;
 import ca.lukegrahamlandry.modularprofessions.init.NetworkInit;
 import ca.lukegrahamlandry.modularprofessions.network.clientbound.AddProfXpPacket;
+import ca.lukegrahamlandry.modularprofessions.network.clientbound.ClearProfessionsPacket;
+import ca.lukegrahamlandry.modularprofessions.network.clientbound.SyncProfessionJson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -21,6 +23,8 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class ModularProfessionsApiImpl implements ModularProfessionsApi {
     private final Map<ResourceLocation, ProfessionData> PROFESSION_REGISTRY = new HashMap<>();
@@ -83,18 +87,18 @@ public class ModularProfessionsApiImpl implements ModularProfessionsApi {
         return !isEverLocked;
     }
 
-    private static void debug(String msg){
+    private static void printLoadingError(String msg){
         ModMain.LOGGER.debug("[loading error]" + msg);
     }
 
-    @Override  // TODO sync the json string to client so i can call this there
+    @Override
     public void parse(ResourceLocation name, JsonObject data) {
         ProfessionData profession;
         if (PROFESSION_REGISTRY.containsKey(name)){
             profession = getData(name);
         } else {
             if (!data.has("leveling") || LevelRule.parse(data.getAsJsonObject("leveling")) == null){
-                debug(name + " has an invalid leveling rule. skipping!");
+                printLoadingError(name + " has an invalid leveling rule. skipping!");
                 return;
             }
             profession = new ProfessionData(name, LevelRule.parse(data.getAsJsonObject("leveling")));
@@ -102,6 +106,62 @@ public class ModularProfessionsApiImpl implements ModularProfessionsApi {
         }
 
         if (data.has("unlocked")) parseUnlocked(profession, data.get("unlocked"));
+        if (data.has("triggers")) parseTriggers(profession, data.get("triggers"));
+    }
+
+    @Override
+    public void clearAll() {
+        PROFESSION_REGISTRY.clear();
+        ProfessionDataLoader.toSync.clear();
+    }
+
+    @Override
+    public void resyncToClient() {
+        NetworkInit.INSTANCE.send(PacketDistributor.ALL.noArg(), new ClearProfessionsPacket());
+
+        for (Map.Entry<ResourceLocation, JsonElement> file : ProfessionDataLoader.toSync){
+            NetworkInit.INSTANCE.send(PacketDistributor.ALL.noArg(), new SyncProfessionJson(file.getKey(), file.getValue()));
+        }
+    }
+
+    @Override
+    public void awardXp(Player player, ResourceLocation profession, XpTrigger trigger) {
+        addXp(player, profession, trigger.getAmount());
+    }
+
+    @Override
+    public void handleCraftingTriggers(Player player, ItemStack output, List<ItemStack> input) {
+        forEachProfessionTrigger((profession, trigger) -> {
+            if (trigger instanceof XpTrigger.Crafting){
+                boolean matches = false;
+                if (((XpTrigger.Crafting) trigger).output.contains(output)){
+                    matches = true;
+                } else {
+                    for (ItemStack in : input){
+                        if (((XpTrigger.Crafting) trigger).input.contains(in)){
+                            matches = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (matches) {
+                    System.out.println("add craft xp " + trigger.amount);
+                    awardXp(player, profession, trigger);
+                }
+            }
+        });
+    }
+
+    private void forEachProfessionTrigger(BiConsumer<ResourceLocation, XpTrigger> action) {
+        for (ResourceLocation profession : getProfessions()){
+            ProfessionData data = getData(profession);
+            System.out.println(data.triggers.size());
+            for (XpTrigger trigger : data.triggers){
+                System.out.println(profession + " " + trigger);
+                action.accept(profession, trigger);
+            }
+        }
     }
 
     private void parseUnlocked(ProfessionData profession, JsonElement data){
@@ -117,7 +177,7 @@ public class ModularProfessionsApiImpl implements ModularProfessionsApi {
                         if (i.contains(":")){
                             Item obj = ForgeRegistries.ITEMS.getValue(new ResourceLocation(i));
                             if (obj == null){
-                                debug(key + " unlocked at " + profession.getId() + " level " + level + ": " + i + " is an invalid item");
+                                printLoadingError(key + " unlocked at " + profession.getId() + " level " + level + ": " + i + " is an invalid item");
                             } else {
                                 profession.addLockedItem(obj, level, type);
                             }
@@ -128,13 +188,21 @@ public class ModularProfessionsApiImpl implements ModularProfessionsApi {
                             if (ModList.get().isLoaded(i)) {
                                 profession.addLockedMod(i, level, type);
                             } else {
-                                debug(key + " unlocked at " + profession.getId() + " level " + level + ": " + i + " mod is not loaded");
+                                printLoadingError(key + " unlocked at " + profession.getId() + " level " + level + ": " + i + " mod is not loaded");
                             }
                         }
                     }
                 }
             }
             level++;
+        }
+    }
+
+    private void parseTriggers(ProfessionData profession, JsonElement data) {
+        System.out.println("parse triggers " + data.getAsJsonArray().size());
+        for (JsonElement triggerData : data.getAsJsonArray()){
+            XpTrigger trigger = XpTrigger.parse(triggerData.getAsJsonObject(), ModularProfessionsApiImpl::printLoadingError);
+            if (trigger != null) profession.addTrigger(trigger);
         }
     }
 }

@@ -2,6 +2,7 @@ package ca.lukegrahamlandry.modularprofessions.init;
 
 import ca.lukegrahamlandry.modularprofessions.ModMain;
 import ca.lukegrahamlandry.modularprofessions.network.clientbound.AddProfXpPacket;
+import ca.lukegrahamlandry.modularprofessions.network.clientbound.ClearProfessionsPacket;
 import ca.lukegrahamlandry.modularprofessions.network.clientbound.SyncProfessionJson;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkRegistry;
@@ -20,5 +21,6 @@ public class NetworkInit {
 
         INSTANCE.registerMessage(nextID(), AddProfXpPacket.class, AddProfXpPacket::encode, AddProfXpPacket::new, AddProfXpPacket::handle);
         INSTANCE.registerMessage(nextID(), SyncProfessionJson.class, SyncProfessionJson::encode, SyncProfessionJson::new, SyncProfessionJson::handle);
+        INSTANCE.registerMessage(nextID(), ClearProfessionsPacket.class, ClearProfessionsPacket::encode, ClearProfessionsPacket::new, ClearProfessionsPacket::handle);
     }
 }

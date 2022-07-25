@@ -9,10 +9,12 @@ import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class ProfessionData implements LevelRule {
     private final ResourceLocation id;
     private final LevelRule leveling;
+    final List<XpTrigger> triggers = new ArrayList<>();
 
     public ProfessionData(ResourceLocation id, LevelRule leveling){
         this.id = id;
@@ -72,6 +74,10 @@ public class ProfessionData implements LevelRule {
         createLevels(unlockLevel);
         ItemCollection collection = lockedItems.get(unlockLevel).get(type);
         collection.add(modid);
+    }
+
+    public void addTrigger(XpTrigger trigger) {
+        this.triggers.add(trigger);
     }
 
     public enum LockType {
