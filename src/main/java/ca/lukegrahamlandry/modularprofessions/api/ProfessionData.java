@@ -31,13 +31,13 @@ public class ProfessionData implements LevelRule {
     }
 
 
-    ArrayList<HashMap<LockType, ItemCollection>> lockedItems = new ArrayList<>();
+    ArrayList<HashMap<LockType, ItemCollection<Item>>> lockedItems = new ArrayList<>();
 
     public boolean unlockedAtLevel(ItemStack stack, int level, LockType type){
         for (int i=0;i<=level;i++){
             if (lockedItems.size() <= i) break;
 
-            ItemCollection collection = lockedItems.get(i).get(type);
+            ItemCollection<Item> collection = lockedItems.get(i).get(type);
             if (collection.contains(stack)) return true;
         }
         return false;
@@ -49,10 +49,10 @@ public class ProfessionData implements LevelRule {
 
     private void createLevels(int level){
         while (lockedItems.size() <= level){
-            HashMap<LockType, ItemCollection> map = new HashMap<>();
-            map.put(LockType.CRAFT, new ItemCollection());
-            map.put(LockType.ITEM_USE, new ItemCollection());
-            map.put(LockType.BLOCK_USE, new ItemCollection());
+            HashMap<LockType, ItemCollection<Item>> map = new HashMap<>();
+            map.put(LockType.CRAFT, new ItemCollection<>());
+            map.put(LockType.ITEM_USE, new ItemCollection<>());
+            map.put(LockType.BLOCK_USE, new ItemCollection<>());
             lockedItems.add(map);
         }
     }
@@ -60,19 +60,19 @@ public class ProfessionData implements LevelRule {
 
     public void addLockedItem(Item item, int unlockLevel, LockType type) {
         createLevels(unlockLevel);
-        ItemCollection collection = lockedItems.get(unlockLevel).get(type);
+        ItemCollection<Item> collection = lockedItems.get(unlockLevel).get(type);
         collection.add(item);
     }
 
     public void addLockedTag(TagKey<Item> tag, int unlockLevel, LockType type) {
         createLevels(unlockLevel);
-        ItemCollection collection = lockedItems.get(unlockLevel).get(type);
+        ItemCollection<Item> collection = lockedItems.get(unlockLevel).get(type);
         collection.add(tag);
     }
 
     public void addLockedMod(String modid, int unlockLevel, LockType type) {
         createLevels(unlockLevel);
-        ItemCollection collection = lockedItems.get(unlockLevel).get(type);
+        ItemCollection<Item> collection = lockedItems.get(unlockLevel).get(type);
         collection.add(modid);
     }
 

@@ -24,7 +24,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public class ModularProfessionsApiImpl implements ModularProfessionsApi {
     private final Map<ResourceLocation, ProfessionData> PROFESSION_REGISTRY = new HashMap<>();
@@ -130,35 +129,10 @@ public class ModularProfessionsApiImpl implements ModularProfessionsApi {
     }
 
     @Override
-    public void handleCraftingTriggers(Player player, ItemStack output, List<ItemStack> input) {
-        forEachProfessionTrigger((profession, trigger) -> {
-            if (trigger instanceof XpTrigger.Crafting){
-                boolean matches = false;
-                if (((XpTrigger.Crafting) trigger).output.contains(output)){
-                    matches = true;
-                } else {
-                    for (ItemStack in : input){
-                        if (((XpTrigger.Crafting) trigger).input.contains(in)){
-                            matches = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (matches) {
-                    System.out.println("add craft xp " + trigger.amount);
-                    awardXp(player, profession, trigger);
-                }
-            }
-        });
-    }
-
-    private void forEachProfessionTrigger(BiConsumer<ResourceLocation, XpTrigger> action) {
+    public void forEachProfessionTrigger(BiConsumer<ResourceLocation, XpTrigger> action) {
         for (ResourceLocation profession : getProfessions()){
             ProfessionData data = getData(profession);
-            System.out.println(data.triggers.size());
             for (XpTrigger trigger : data.triggers){
-                System.out.println(profession + " " + trigger);
                 action.accept(profession, trigger);
             }
         }
@@ -199,7 +173,6 @@ public class ModularProfessionsApiImpl implements ModularProfessionsApi {
     }
 
     private void parseTriggers(ProfessionData profession, JsonElement data) {
-        System.out.println("parse triggers " + data.getAsJsonArray().size());
         for (JsonElement triggerData : data.getAsJsonArray()){
             XpTrigger trigger = XpTrigger.parse(triggerData.getAsJsonObject(), ModularProfessionsApiImpl::printLoadingError);
             if (trigger != null) profession.addTrigger(trigger);

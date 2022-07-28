@@ -7,6 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 
 public interface ModularProfessionsApi {
     static ModularProfessionsApi get(){
@@ -32,5 +33,5 @@ public interface ModularProfessionsApi {
 
     void awardXp(Player player, ResourceLocation profession, XpTrigger trigger);
 
-    void handleCraftingTriggers(Player player, ItemStack output, List<ItemStack> input);
+    void forEachProfessionTrigger(BiConsumer<ResourceLocation, XpTrigger> action);
 }

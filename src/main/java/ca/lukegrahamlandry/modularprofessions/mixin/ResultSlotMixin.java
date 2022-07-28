@@ -1,6 +1,7 @@
 package ca.lukegrahamlandry.modularprofessions.mixin;
 
 import ca.lukegrahamlandry.modularprofessions.ModMain;
+import ca.lukegrahamlandry.modularprofessions.event.XpTriggerEvents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
@@ -20,9 +21,8 @@ public class ResultSlotMixin {
 
     @Inject(at=@At("HEAD"), method = "onTake")
     private void awardXpForCrafting(Player player, ItemStack stack, CallbackInfo ci){
-        System.out.println("crafting onTake mixin");
         if (!player.level.isClientSide) {
-            ModMain.API.handleCraftingTriggers(player, stack, toStackList(this.craftSlots));
+            XpTriggerEvents.onCraft(player, stack, toStackList(this.craftSlots));
         }
     }
 

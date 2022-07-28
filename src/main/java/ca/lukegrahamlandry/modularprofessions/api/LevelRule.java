@@ -9,7 +9,7 @@ public interface LevelRule {
             return new Linear(leveling.get("scale").getAsFloat());
         }
         if (type.equals("power")){
-            return new Linear(leveling.get("scale").getAsFloat());
+            return new Power(leveling.get("scale").getAsFloat());
         }
         return null;
     }

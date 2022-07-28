@@ -8,10 +8,52 @@
       "type": "modularprofessions:crafting",
       "amount": 1,
       "input": [
-        "minecraft:iron_ingot"
+        "minecraft:iron_ingot",
+        "minecraft:gold_ingot"
       ],
       "output": [
         "minecraft:stone_pickaxe"
+      ]
+    },
+    {
+      "type": "modularprofessions:block",
+      "amount": 1,
+      "placed": [
+        "minecraft:glass"
+      ],
+      "broken": [
+        "minecraft:iron_ore",
+        "minecraft:gold_ore"
+      ]
+    },
+    {
+      "type": "modularprofessions:block",
+      "amount": 1,
+      "broken": [
+        "minecraft:wheat"
+      ],
+      "state": {
+        "age": 7
+      }
+    },
+    {
+      "type": "modularprofessions:deal_damage",
+      "amount": 1,
+      "entity": [
+        "minecraft:zombie"
+      ],
+      "weapon": [
+        "minecraft:iron_sword"
+      ]
+    },
+    {
+      "type": "modularprofessions:kill",
+      "amount": 1,
+      "entity": [
+        "minecraft:sheep"
+      ],
+      "weapon": [
+        "minecraft:stone_sword"
       ]
     }
   ],

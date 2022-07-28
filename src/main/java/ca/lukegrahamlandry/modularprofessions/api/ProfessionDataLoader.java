@@ -47,8 +47,6 @@ public class ProfessionDataLoader extends SimpleJsonResourceReloadListener {
 
     @SubscribeEvent
     public static void initCaps(AddReloadListenerEvent event){
-        System.out.println("reload listener");
-
         toSync.clear();
         event.addListener(new ProfessionDataLoader());
     }

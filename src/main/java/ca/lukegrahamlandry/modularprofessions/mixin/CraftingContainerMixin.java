@@ -20,7 +20,6 @@ import java.util.Optional;
 public class CraftingContainerMixin {
     @Inject(at=@At("HEAD"), method = "slotChangedCraftingGrid", cancellable = true)
     private static void mayPickupPreventLockedItems(AbstractContainerMenu p_150547_, Level p_150548_, Player p_150549_, CraftingContainer p_150550_, ResultContainer p_150551_, CallbackInfo ci){
-        System.out.println("slotChangedCraftingGrid mixin");
         if (!p_150548_.isClientSide) {
             ServerPlayer serverplayer = (ServerPlayer)p_150549_;
             ItemStack itemstack = ItemStack.EMPTY;
